@@ -4,6 +4,7 @@ import argparse
 import csv
 import hashlib
 import json
+import os
 import time
 import urllib.parse
 import urllib.request
@@ -17,6 +18,34 @@ END = "2025-01-03T00:00:00.000"
 FIELDS = ["unique_key", "created_date", "closed_date", "agency", "complaint_type",
           "descriptor", "status", "borough", "incident_zip", "latitude", "longitude",
           "due_date", "resolution_description", "resolution_action_updated_date"]
+
+
+def atomic_json_write(path, payload):
+    temporary = path.with_suffix(path.suffix + ".tmp")
+    temporary.write_text(json.dumps(payload, indent=2) + "\n")
+    os.replace(temporary, path)
+
+
+def prepare_partial(partial, checkpoint, fields):
+    """Return the durable row offset, rolling back an uncommitted appended page."""
+    if not checkpoint.exists():
+        with partial.open("w", newline="") as handle:
+            csv.DictWriter(handle, fieldnames=fields).writeheader()
+        return 0
+    state = json.loads(checkpoint.read_text())
+    expected = state["offset"]
+    if not partial.exists():
+        raise RuntimeError("checkpoint exists but partial data file is missing")
+    with partial.open(newline="") as handle:
+        rows = list(csv.DictReader(handle))
+    if len(rows) < expected:
+        raise RuntimeError(f"partial file has {len(rows)} rows but checkpoint requires {expected}")
+    if len(rows) > expected:
+        with partial.open("w", newline="") as handle:
+            writer = csv.DictWriter(handle, fieldnames=fields, extrasaction="ignore")
+            writer.writeheader()
+            writer.writerows(rows[:expected])
+    return expected
 
 
 def fetch_page(offset, limit, retries=4):
@@ -45,30 +74,23 @@ def main():
     args = parser.parse_args()
     RAW.mkdir(parents=True, exist_ok=True)
     output = RAW / "nyc311_2025-01-01_to_2025-01-02.csv"
+    partial = RAW / "nyc311_2025-01-01_to_2025-01-02.partial.csv"
     checkpoint = RAW / "checkpoint.json"
-    offset = 0
-    rows = []
-    source_urls = []
-    if checkpoint.exists():
-        state = json.loads(checkpoint.read_text())
-        offset = state["offset"]
-        if output.exists():
-            with output.open(newline="") as handle:
-                rows = list(csv.DictReader(handle))
+    offset = prepare_partial(partial, checkpoint, FIELDS)
     while True:
-        page, url = fetch_page(offset, args.page_size)
-        source_urls.append(url)
+        page, _ = fetch_page(offset, args.page_size)
         if not page:
             break
-        rows.extend(page)
-        offset += len(page)
-        with output.open("w", newline="") as handle:
+        with partial.open("a", newline="") as handle:
             writer = csv.DictWriter(handle, fieldnames=FIELDS, extrasaction="ignore")
-            writer.writeheader()
-            writer.writerows(rows)
-        checkpoint.write_text(json.dumps({"offset": offset, "rows": len(rows)}, indent=2) + "\n")
+            writer.writerows(page)
+            handle.flush()
+            os.fsync(handle.fileno())
+        offset += len(page)
+        atomic_json_write(checkpoint, {"offset": offset})
         if len(page) < args.page_size:
             break
+    os.replace(partial, output)
     digest = hashlib.sha256(output.read_bytes()).hexdigest()
     manifest = {
         "dataset": "311 Service Requests from 2020 to Present",
@@ -79,14 +101,14 @@ def main():
         "window_start_inclusive": START,
         "window_end_exclusive": END,
         "ordering": "created_date,unique_key",
-        "rows": len(rows),
+        "rows": offset,
         "sha256": digest,
         "retrieved_utc": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
         "note": "URLs contain only public query parameters; raw records are unmodified API responses projected to listed fields.",
     }
-    (RAW / "source_manifest.json").write_text(json.dumps(manifest, indent=2) + "\n")
+    atomic_json_write(RAW / "source_manifest.json", manifest)
     checkpoint.unlink(missing_ok=True)
-    print(f"wrote {len(rows)} factual records; sha256={digest}")
+    print(f"wrote {offset} factual records; sha256={digest}")
 
 
 if __name__ == "__main__":
