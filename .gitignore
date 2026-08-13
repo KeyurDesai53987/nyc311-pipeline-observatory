@@ -1,3 +1,5 @@
 data/raw/checkpoint.json
+data/raw/*.partial.csv
+data/raw/*.tmp
 __pycache__/
 *.pyc
