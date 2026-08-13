@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="650" viewBox="0 0 1200 650">
+<rect width="100%" height="100%" fill="#FAFAF7"/>
+<text x="150" y="50" font-family="Arial" font-size="30" font-weight="700" fill="#17324D">NYC 311 requests by borough</text>
+<text x="150" y="82" font-family="Arial" font-size="16" fill="#52616B">24,684 requests created January 1–2, 2025; source: NYC Open Data</text>
+<rect x="189.9" y="162.8571428571429" width="110.19999999999999" height="357.1428571428571" rx="4" fill="#007C91"/>
+<text x="245.0" y="152.8571428571429" text-anchor="middle" font-family="Arial" font-size="14" font-weight="700">11,152</text>
+<text x="245.0" y="548" text-anchor="middle" font-family="Arial" font-size="14">Bronx</text>
+<rect x="379.9" y="347.3211723713876" width="110.19999999999999" height="172.6788276286124" rx="4" fill="#007C91"/>
+<text x="435.0" y="337.3211723713876" text-anchor="middle" font-family="Arial" font-size="14" font-weight="700">5,392</text>
+<text x="435.0" y="548" text-anchor="middle" font-family="Arial" font-size="14">Brooklyn</text>
+<rect x="569.9" y="388.44127895060467" width="110.19999999999999" height="131.55872104939536" rx="4" fill="#007C91"/>
+<text x="625.0" y="378.44127895060467" text-anchor="middle" font-family="Arial" font-size="14" font-weight="700">4,108</text>
+<text x="625.0" y="548" text-anchor="middle" font-family="Arial" font-size="14">Queens</text>
+<rect x="759.9" y="410.4104324656692" width="110.19999999999999" height="109.5895675343308" rx="4" fill="#007C91"/>
+<text x="815.0" y="400.4104324656692" text-anchor="middle" font-family="Arial" font-size="14" font-weight="700">3,422</text>
+<text x="815.0" y="548" text-anchor="middle" font-family="Arial" font-size="14">Manhattan</text>
+<rect x="949.9" y="500.8490469358475" width="110.19999999999999" height="19.15095306415249" rx="4" fill="#007C91"/>
+<text x="1005.0" y="490.8490469358475" text-anchor="middle" font-family="Arial" font-size="14" font-weight="700">598</text>
+<text x="1005.0" y="548" text-anchor="middle" font-family="Arial" font-size="14">Staten I.</text>
+</svg>

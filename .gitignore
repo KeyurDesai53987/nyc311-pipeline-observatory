@@ -1,0 +1,3 @@
+data/raw/checkpoint.json
+__pycache__/
+*.pyc

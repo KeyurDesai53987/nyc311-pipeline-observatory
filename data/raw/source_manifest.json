@@ -1,0 +1,14 @@
+{
+  "dataset": "311 Service Requests from 2020 to Present",
+  "dataset_id": "erm2-nwe9",
+  "publisher": "NYC OpenData / NYC 311",
+  "documentation": "https://dev.socrata.com/foundry/data.cityofnewyork.us/erm2-nwe9",
+  "endpoint": "https://data.cityofnewyork.us/resource/erm2-nwe9.json",
+  "window_start_inclusive": "2025-01-01T00:00:00.000",
+  "window_end_exclusive": "2025-01-03T00:00:00.000",
+  "ordering": "created_date,unique_key",
+  "rows": 24684,
+  "sha256": "530b9add446cf540f7203baa1110c9e6e8523e2b80e78c5c59bccca99637cf2c",
+  "retrieved_utc": "2026-08-13T12:58:11Z",
+  "note": "URLs contain only public query parameters; raw records are unmodified API responses projected to listed fields."
+}
