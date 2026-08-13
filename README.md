@@ -8,7 +8,7 @@ Dataset: [NYC Open Data — 311 Service Requests from 2020 to Present](https://d
 
 The difficult part is not drawing a chart. It is making sure the chart can be defended. The pipeline therefore records the exact time window, query ordering, retrieval timestamp, row count, and SHA-256 of the raw snapshot. Every summary is rebuilt from the checked-in records.
 
-The ingestion path uses ordered 5,000-row pages and writes a checkpoint after each successful page. A retry uses exponential backoff; a restarted run resumes from the last committed offset. No records are generated to demonstrate these controls.
+The ingestion path uses ordered 5,000-row pages. Each page is flushed to a partial file before an atomic checkpoint replacement. On restart, rows beyond the durable checkpoint are rolled back before retrieval resumes, preventing duplication after an interruption between the data and checkpoint writes. A retry uses exponential backoff. The recovery test uses records from the checked-in factual snapshot rather than generated rows.
 
 ## Findings from the snapshot
 
